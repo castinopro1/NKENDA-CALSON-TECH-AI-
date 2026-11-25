@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NKENDA CALSON TECH AI</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #101827;
+  color: white;
+}
+
+header {
+  background: #080d18;
+  padding: 20px;
+  text-align: center;
+  border-bottom: 2px solid #2878ff;
+}
+
+header h2 {
+  color: #45a0ff;
+}
+
+.chat {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
+
+#messages {
+  height: 60vh;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.message {
+  background: #202e43;
+  padding: 14px;
+  border-radius: 12px;
+  margin: 12px 0;
+  line-height: 1.5;
+}
+
+.user {
+  background: #1768d4;
+  margin-left: 35px;
+}
+
+.input-area {
+  display: flex;
+  gap: 8px;
+  position: sticky;
+  bottom: 0;
+  background: #101827;
+  padding: 12px 0;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  padding: 15px;
+  border-radius: 25px;
+  border: none;
+  outline: none;
+}
+
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 20px;
+  background: #2878ff;
+  color: white;
+  font-weight: bold;
+}
+
+button:active {
+  background: #1453b5;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>NKENDA CALSON TECH AI</h2>
+<p>Your intelligent AI assistant</p>
+</header>
+
+<div class="chat">
+<div id="messages">
+<div class="message">
+Welcome to NKENDA CALSON TECH AI!
+<br><br>
+I am your AI assistant. Ask me anything!
+</div>
+</div>
+
+<div class="input-area">
+<input id="question" placeholder="Ask me anything...">
+<button onclick="sendMessage()">Send</button>
+<button onclick="startVoice()">🎤</button>
+</div>
+</div>
+
+<script>
+async function sendMessage() {
+  const input = document.getElementById("question");
+  const messages = document.getElementById("messages");
+  const question = input.value.trim();
+
+  if (!question) return;
+
+  messages.innerHTML +=
+    `<div class="message user"></div>`;
+
+  messages.lastElementChild.textContent = question;
+  input.value = "";
+
+  const reply = document.createElement("div");
+  reply.className = "message";
+  reply.textContent = "Connecting to AI...";
+  messages.appendChild(reply);
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: question })
+    });
+
+    if (!response.ok) {
+      throw new Error("AI server is not ready.");
+    }
+
+    const data = await response.json();
+    reply.textContent = data.reply || "No answer received.";
+
+  } catch (error) {
+    reply.textContent =
+      "AI backend is not connected yet. Please connect the secure AI server.";
+  }
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function startVoice() {
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice recognition is not supported in this browser.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    document.getElementById("question").value =
+      event.results[0][0].transcript;
+  };
+}
+</script>
+
+</body>
+</html>
